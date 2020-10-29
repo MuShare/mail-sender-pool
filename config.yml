@@ -1,0 +1,13 @@
+server:
+  run-mode: test
+  http-port: 8080
+  read-timeout: 60
+  write-timeout: 60
+
+database:
+  type: mysql
+  user: www
+  password: 123
+  host: localhost
+  name: mail-sender-pool
+  table-prefix: msp
