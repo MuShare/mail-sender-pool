@@ -28,7 +28,8 @@ type Config struct {
 	DataBaseConfiguration Database `mapstructure:"database"`
 }
 
-var Configuration Config
+var ServerConfiguration Server
+var DatabaseConfiguration Database
 
 func Setup() {
 	viper.SetConfigFile("config.yml")
@@ -37,7 +38,10 @@ func Setup() {
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("failed to load config file: %s", err))
 	}
+	var Configuration Config
 	if err := viper.Unmarshal(&Configuration); err != nil {
 		panic(fmt.Errorf("failed to load config file: %s", err))
 	}
+	ServerConfiguration = Configuration.ServerConfiguration
+	DatabaseConfiguration = Configuration.DataBaseConfiguration
 }

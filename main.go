@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/MuShare/mail-sender-pool/models"
+
 	"github.com/MuShare/mail-sender-pool/config"
 
 	"github.com/MuShare/mail-sender-pool/routers"
@@ -12,6 +14,7 @@ import (
 
 func init() {
 	config.Setup()
+	models.Setup()
 }
 
 func main() {
@@ -23,7 +26,7 @@ func main() {
 		WriteTimeout:   time.Duration(60 * time.Second),
 		MaxHeaderBytes: 1 << 20,
 	}
-	log.Println(config.Configuration.ServerConfiguration.RunMode)
+	log.Println(config.ServerConfiguration.RunMode)
 
 	server.ListenAndServe()
 }

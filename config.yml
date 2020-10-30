@@ -8,6 +8,6 @@ database:
   type: mysql
   user: www
   password: 123
-  host: localhost
+  host: localhost:3306
   name: mail-sender-pool
   table-prefix: msp
