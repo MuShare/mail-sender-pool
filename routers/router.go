@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//InitRouter xxx
 func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -13,6 +14,8 @@ func InitRouter() *gin.Engine {
 	apiv1 := r.Group("/api/v1")
 	{
 		apiv1.GET("/health", v1.HealthCheck)
+		apiv1.POST("/add-smtp-account", v1.AddSMTPAccount)
+		apiv1.POST("/send-mail", v1.SendMail)
 	}
 	return r
 }

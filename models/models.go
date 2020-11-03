@@ -3,114 +3,50 @@ package models
 import (
 	"fmt"
 	"log"
-	"time"
+
+	"gorm.io/gorm/schema"
 
 	"github.com/MuShare/mail-sender-pool/config"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var db *gorm.DB
 
+//Model base fields
 type Model struct {
-	ID         int `gorm:"primary_key" json:"id"`
-	CreatedOn  int `json:"created_on"`
-	ModifiedOn int `json:"modified_on"`
-	DeletedOn  int `json:"deleted_on"`
+	ID        int            `gorm:"primary_key" json:"id"`
+	CreatedAt int            `json:"created_at"`
+	UpdatedAt int            `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 // Setup initializes the database instance
 func Setup() {
 	var err error
-	db, err = gorm.Open(config.DatabaseConfiguration.Type, (fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
+	db, err = gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		config.DatabaseConfiguration.User,
 		config.DatabaseConfiguration.Password,
 		config.DatabaseConfiguration.Host,
-		config.DatabaseConfiguration.Name)))
+		config.DatabaseConfiguration.Name)), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix:   config.DatabaseConfiguration.TablePrefix + "_",
+			SingularTable: true,
+		},
+	})
 	if err != nil {
 		log.Fatalf("failed to connect to database. err: %v", err)
 	}
 
-	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		return config.DatabaseConfiguration.TablePrefix + defaultTableName
+	if err = migrateDatabase(); err != nil {
+		log.Fatalf("failed to migrate database. err: %v", err)
 	}
-
-	db.SingularTable(true)
-	db.Callback().Create().Replace("gorm:update_time_stamp", updateTimeStampForCreateCallback)
-	db.Callback().Update().Replace("gorm:update_time_stamp", updateTimeStampForUpdateCallback)
-	db.Callback().Delete().Replace("gorm:delete", deleteCallback)
-	db.DB().SetMaxIdleConns(10)
-	db.DB().SetMaxOpenConns(100)
-	db.AutoMigrate(&SMTPAccount{})
-	// if err := db.Migrator().AutoMigrate(&SMTPAccount{}); err != nil {
-	// 	panic(fmt.Errorf("failed to migrate database: %s", err))
-	// }
 }
 
 // CloseDB closes database connection (unnecessary)
 func CloseDB() {
-	defer db.Close()
-}
-
-// updateTimeStampForCreateCallback will set `CreatedOn`, `ModifiedOn` when creating
-func updateTimeStampForCreateCallback(scope *gorm.Scope) {
-	if !scope.HasError() {
-		nowTime := time.Now().Unix()
-		if createTimeField, ok := scope.FieldByName("CreatedOn"); ok {
-			if createTimeField.IsBlank {
-				createTimeField.Set(nowTime)
-			}
-		}
-
-		if modifyTimeField, ok := scope.FieldByName("ModifiedOn"); ok {
-			if modifyTimeField.IsBlank {
-				modifyTimeField.Set(nowTime)
-			}
-		}
+	db, err := db.DB()
+	if err != nil {
+		defer db.Close()
 	}
-}
-
-// updateTimeStampForUpdateCallback will set `ModifiedOn` when updating
-func updateTimeStampForUpdateCallback(scope *gorm.Scope) {
-	if _, ok := scope.Get("gorm:update_column"); !ok {
-		scope.SetColumn("ModifiedOn", time.Now().Unix())
-	}
-}
-
-// deleteCallback will set `DeletedOn` where deleting
-func deleteCallback(scope *gorm.Scope) {
-	if !scope.HasError() {
-		var extraOption string
-		if str, ok := scope.Get("gorm:delete_option"); ok {
-			extraOption = fmt.Sprint(str)
-		}
-
-		deletedOnField, hasDeletedOnField := scope.FieldByName("DeletedOn")
-
-		if !scope.Search.Unscoped && hasDeletedOnField {
-			scope.Raw(fmt.Sprintf(
-				"UPDATE %v SET %v=%v%v%v",
-				scope.QuotedTableName(),
-				scope.Quote(deletedOnField.DBName),
-				scope.AddToVars(time.Now().Unix()),
-				addExtraSpaceIfExist(scope.CombinedConditionSql()),
-				addExtraSpaceIfExist(extraOption),
-			)).Exec()
-		} else {
-			scope.Raw(fmt.Sprintf(
-				"DELETE FROM %v%v%v",
-				scope.QuotedTableName(),
-				addExtraSpaceIfExist(scope.CombinedConditionSql()),
-				addExtraSpaceIfExist(extraOption),
-			)).Exec()
-		}
-	}
-}
-
-// addExtraSpaceIfExist adds a separator
-func addExtraSpaceIfExist(str string) string {
-	if str != "" {
-		return " " + str
-	}
-	return ""
 }
