@@ -15,10 +15,9 @@ var db *gorm.DB
 
 //Model base fields
 type Model struct {
-	ID        int            `gorm:"primary_key" json:"id"`
-	CreatedAt int            `json:"created_at"`
-	UpdatedAt int            `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID        int `gorm:"primary_key" json:"id"`
+	CreatedAt int `json:"created_at"`
+	UpdatedAt int `json:"updated_at"`
 }
 
 // Setup initializes the database instance
@@ -30,7 +29,6 @@ func Setup() {
 		config.DatabaseConfiguration.Host,
 		config.DatabaseConfiguration.Name)), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   config.DatabaseConfiguration.TablePrefix + "_",
 			SingularTable: true,
 		},
 	})

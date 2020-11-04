@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"net"
 	"net/mail"
 	"net/smtp"
@@ -91,12 +92,16 @@ func SendMail(recv string, subj string, contentType string, body string) error {
 			return err
 		}
 	} else {
-		fmt.Println(message)
 		toAddresses := []string{to.Address}
 		err := smtp.SendMail(smtpAccount.Host, auth, from.Address, toAddresses, []byte(message))
 		if err != nil {
 			return err
 		}
 	}
+
+	if err := smtpAccount.IncreaseTodayUsedQouta(); err != nil {
+		return err
+	}
+	log.Printf("used host: %s username %s", smtpAccount.Host, smtpAccount.Username)
 	return nil
 }
