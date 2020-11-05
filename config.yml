@@ -11,3 +11,6 @@ database:
   host: localhost:3306
   name: mail-sender-pool
   table-prefix: msp
+
+log:
+  log-file-path: ./server.log
