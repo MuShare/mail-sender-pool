@@ -25,6 +25,7 @@ type Database struct {
 
 type Log struct {
 	LogFilePath string `mapstructure:"log-file-path"`
+	SlackToken  string `mapstructure:"slack-token"`
 }
 
 type Config struct {

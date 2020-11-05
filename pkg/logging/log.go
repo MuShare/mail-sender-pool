@@ -8,6 +8,7 @@ import (
 	"runtime"
 
 	"github.com/MuShare/mail-sender-pool/config"
+	"github.com/slack-go/slack"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -26,9 +27,10 @@ var (
 	DefaultPrefix      = ""
 	DefaultCallerDepth = 2
 
-	logger     *log.Logger
-	logPrefix  = ""
-	levelFlags = []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
+	logger      *log.Logger
+	slackClient *slack.Client
+	logPrefix   = ""
+	levelFlags  = []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
 )
 
 //Setup xxx
@@ -42,7 +44,10 @@ func Setup() {
 			Compress:   true,
 		}, logPrefix, log.LstdFlags)
 	} else {
-		logger = log.New(os.Stderr, "", log.LstdFlags)
+		logger = log.New(os.Stderr, logPrefix, log.LstdFlags)
+	}
+	if config.LogConfiguration.SlackToken != "" {
+		slackClient = slack.New(config.LogConfiguration.SlackToken)
 	}
 }
 
@@ -68,12 +73,14 @@ func Warn(v ...interface{}) {
 func Error(v ...interface{}) {
 	setPrefix(ERROR)
 	logger.Println(v...)
+	go slackSendMessage(v)
 }
 
 // Fatal output logs at fatal level
 func Fatal(v ...interface{}) {
 	setPrefix(FATAL)
 	logger.Fatalln(v...)
+	go slackSendMessage(v)
 }
 
 // setPrefix set the prefix of the log output
@@ -86,4 +93,15 @@ func setPrefix(level Level) {
 	}
 
 	logger.SetPrefix(logPrefix)
+}
+
+func slackSendMessage(v ...interface{}) {
+	if slackClient != nil {
+		slackClient.SendMessage(
+			"easyjapanese-error",
+			slack.MsgOptionUsername("mail pool test"),
+			slack.MsgOptionIconEmoji(":anger:"),
+			slack.MsgOptionText(fmt.Sprintf("%s   %v", logPrefix, v), true),
+		)
+	}
 }
