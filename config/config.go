@@ -23,13 +23,19 @@ type Database struct {
 	TablePrefix string `mapstructure:"table-prefix"`
 }
 
+type Log struct {
+	LogFilePath string `mapstructure:"enable-slack"`
+}
+
 type Config struct {
 	ServerConfiguration   Server   `mapstructure:"server"`
 	DataBaseConfiguration Database `mapstructure:"database"`
+	LogConfiguration      Log      `mapstructure:"log"`
 }
 
 var ServerConfiguration Server
 var DatabaseConfiguration Database
+var LogConfiguration Log
 
 func Setup() {
 	viper.SetConfigFile("config.yml")
@@ -44,4 +50,5 @@ func Setup() {
 	}
 	ServerConfiguration = Configuration.ServerConfiguration
 	DatabaseConfiguration = Configuration.DataBaseConfiguration
+	LogConfiguration = Configuration.LogConfiguration
 }

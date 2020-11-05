@@ -1,9 +1,10 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/MuShare/mail-sender-pool/pkg/logging"
 
 	"github.com/MuShare/mail-sender-pool/models"
 
@@ -15,6 +16,7 @@ import (
 func init() {
 	config.Setup()
 	models.Setup()
+	logging.Setup()
 }
 
 func main() {
@@ -26,7 +28,7 @@ func main() {
 		WriteTimeout:   time.Duration(60 * time.Second),
 		MaxHeaderBytes: 1 << 20,
 	}
-	log.Println(config.ServerConfiguration.RunMode)
+	logging.Info("start server")
 
 	server.ListenAndServe()
 }
