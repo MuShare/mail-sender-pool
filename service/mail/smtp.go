@@ -5,7 +5,7 @@ import (
 )
 
 //AddSMTPAccount xxx
-func AddSMTPAccount(host string, username string, password string, quotaPerDay int) error {
+func AddSMTPAccount(host string, username string, password string, quotaPerDay int) (int, error) {
 	return models.AddSMTPAccount(models.SMTPAccount{
 		Host:        host,
 		Username:    username,
@@ -22,4 +22,9 @@ func GetAvailableSMTPAccount() (*models.SMTPAccount, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+//GetAllSMTPAccount xxx
+func GetAllSMTPAccount() (*[]models.SMTPAccount, error) {
+	return models.GetAllSMTPAccount()
 }

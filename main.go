@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -23,12 +24,12 @@ func main() {
 	routersInit := routers.InitRouter()
 	server := &http.Server{
 		Handler:        routersInit,
-		Addr:           ":8080",
+		Addr:           fmt.Sprintf(":%d", config.ServerConfiguration.HttpPort),
 		ReadTimeout:    time.Duration(60 * time.Second),
 		WriteTimeout:   time.Duration(60 * time.Second),
 		MaxHeaderBytes: 1 << 20,
 	}
-	logging.Info("start server")
-
+	logging.Info(fmt.Sprintf("mail sender pool, port: %d", config.ServerConfiguration.HttpPort))
 	server.ListenAndServe()
+
 }

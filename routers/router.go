@@ -16,6 +16,7 @@ func InitRouter() *gin.Engine {
 		apiv1.GET("/health", v1.HealthCheck)
 		apiv1.POST("/add-smtp-account", v1.AddSMTPAccount)
 		apiv1.POST("/send-mail", v1.SendMail)
+		apiv1.GET("/all-smtp", v1.GetAllSMTPAccount)
 	}
 	return r
 }

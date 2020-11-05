@@ -4,20 +4,41 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"net"
 	"net/mail"
 	"net/smtp"
 
+	"github.com/MuShare/mail-sender-pool/pkg/logging"
+
 	"github.com/MuShare/mail-sender-pool/models"
 )
 
-//SendMail send mail
-func SendMail(recv string, subj string, contentType string, body string) error {
-	smtpAccount, err := models.GetAvailabeSMTPAccount()
+//SendMailWithSMTP send mail
+func SendMailWithSMTP(smtpID int, recv string, subj string, contentType string, body string) error {
+	var smtpAccount *models.SMTPAccount
+	var err error
+	smtpAccount, err = models.GetSMTPAccountByID(smtpID)
 	if err != nil {
 		return err
 	}
+	return SendMail(smtpAccount, recv, subj, contentType, body)
+}
+
+//SendMailWithAutoSelectSMTP xxx
+func SendMailWithAutoSelectSMTP(recv string, subj string, contentType string, body string) error {
+	var (
+		smtpAccount *models.SMTPAccount
+		err         error
+	)
+	smtpAccount, err = models.GetAvailabeSMTPAccount()
+	if err != nil {
+		return err
+	}
+	return SendMail(smtpAccount, recv, subj, contentType, body)
+}
+
+//SendMail send mail
+func SendMail(smtpAccount *models.SMTPAccount, recv string, subj string, contentType string, body string) error {
 	from := mail.Address{Name: "", Address: "no_reply1@kaboocha.com"}
 	to := mail.Address{Name: "", Address: recv}
 
@@ -102,6 +123,7 @@ func SendMail(recv string, subj string, contentType string, body string) error {
 	if err := smtpAccount.IncreaseTodayUsedQouta(); err != nil {
 		return err
 	}
-	log.Printf("used host: %s username %s", smtpAccount.Host, smtpAccount.Username)
+	logging.Info(fmt.Sprintf("succeed to send mail: %s to %s", subj, recv))
+	logging.Info(fmt.Sprintf("used host: %s username: %s used quota: %d today's quota: %d", smtpAccount.Host, smtpAccount.Username, smtpAccount.TodayUsedQuota, smtpAccount.QuotaPerDay))
 	return nil
 }

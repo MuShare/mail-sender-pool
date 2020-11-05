@@ -21,9 +21,18 @@ func GetAvailabeSMTPAccount() (*SMTPAccount, error) {
 }
 
 //AddSMTPAccount xxx
-func AddSMTPAccount(smtpAccount SMTPAccount) error {
+func AddSMTPAccount(smtpAccount SMTPAccount) (int, error) {
 	result := db.Create(&smtpAccount)
-	return result.Error
+	return smtpAccount.ID, result.Error
+}
+
+//GetSMTPAccountByID xx
+func GetSMTPAccountByID(id int) (*SMTPAccount, error) {
+	var account SMTPAccount
+	if result := db.First(&account, id); result.Error != nil {
+		return nil, result.Error
+	}
+	return &account, nil
 }
 
 //IncreaseTodayUsedQouta xxx
@@ -33,4 +42,11 @@ func (smtpAccount *SMTPAccount) IncreaseTodayUsedQouta() error {
 		return result.Error
 	}
 	return nil
+}
+
+//GetAllSMTPAccount xxx
+func GetAllSMTPAccount() (*[]SMTPAccount, error) {
+	var accounts []SMTPAccount
+	result := db.Find(&accounts)
+	return &accounts, result.Error
 }
