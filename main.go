@@ -27,8 +27,8 @@ func main() {
 	server := &http.Server{
 		Handler:        routersInit,
 		Addr:           fmt.Sprintf(":%d", config.ServerConfiguration.HttpPort),
-		ReadTimeout:    time.Duration(60 * time.Second),
-		WriteTimeout:   time.Duration(60 * time.Second),
+		ReadTimeout:    time.Duration(config.ServerConfiguration.ReadTimeout * time.Millisecond),
+		WriteTimeout:   time.Duration(config.ServerConfiguration.WriteTimeout * time.Millisecond),
 		MaxHeaderBytes: 1 << 20,
 	}
 	logging.Info(fmt.Sprintf("mail sender pool, port: %d", config.ServerConfiguration.HttpPort))
