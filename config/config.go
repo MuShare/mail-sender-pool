@@ -39,8 +39,9 @@ var DatabaseConfiguration Database
 var LogConfiguration Log
 
 func Setup() {
-	viper.SetConfigFile("config.yml")
-	viper.AddConfigPath("/etc/mail-sender-pool/")
+	viper.SetConfigName("config")
+	viper.SetConfigType("yml")
+	viper.AddConfigPath("/etc/mail-sender-pool")
 	viper.AddConfigPath(".")
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("failed to load config file: %s", err))
