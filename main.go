@@ -1,15 +1,36 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"github.com/MuShare/mail-sender-pool/pkg/scheduler"
+	"net/http"
+	"time"
+
+	"github.com/MuShare/mail-sender-pool/pkg/logging"
+
+	"github.com/MuShare/mail-sender-pool/models"
+
+	"github.com/MuShare/mail-sender-pool/config"
+
+	"github.com/MuShare/mail-sender-pool/routers"
 )
 
+func init() {
+	config.Setup()
+	models.Setup()
+	logging.Setup()
+	scheduler.Setup()
+}
+
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run()
+	routersInit := routers.InitRouter()
+	server := &http.Server{
+		Handler:        routersInit,
+		Addr:           fmt.Sprintf(":%d", config.ServerConfiguration.HttpPort),
+		ReadTimeout:    time.Duration(60 * time.Second),
+		WriteTimeout:   time.Duration(60 * time.Second),
+		MaxHeaderBytes: 1 << 20,
+	}
+	logging.Info(fmt.Sprintf("mail sender pool, port: %d", config.ServerConfiguration.HttpPort))
+	server.ListenAndServe()
 }
