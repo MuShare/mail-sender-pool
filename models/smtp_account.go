@@ -1,5 +1,10 @@
 package models
 
+import (
+	"fmt"
+	"github.com/MuShare/mail-sender-pool/pkg/logging"
+)
+
 //SMTPAccount aoocunt details
 type SMTPAccount struct {
 	Model
@@ -49,4 +54,14 @@ func GetAllSMTPAccount() (*[]SMTPAccount, error) {
 	var accounts []SMTPAccount
 	result := db.Find(&accounts)
 	return &accounts, result.Error
+}
+
+//RestSMTPQuota xxx
+func RestSMTPQuota() error {
+	if result := db.Model(&SMTPAccount{}).Where("today_used_quota!=0").Update("today_used_quota", "0"); result.Error != nil {
+		logging.Error(fmt.Sprintf("failed to reset smtp quota %s", result.Error))
+		return result.Error
+	}
+	logging.Info(fmt.Sprintf("Succeed to reset smtp quota"))
+	return nil
 }

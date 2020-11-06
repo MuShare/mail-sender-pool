@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/MuShare/mail-sender-pool/pkg/scheduler"
 	"net/http"
 	"time"
 
@@ -18,6 +19,7 @@ func init() {
 	config.Setup()
 	models.Setup()
 	logging.Setup()
+	scheduler.Setup()
 }
 
 func main() {
@@ -31,5 +33,4 @@ func main() {
 	}
 	logging.Info(fmt.Sprintf("mail sender pool, port: %d", config.ServerConfiguration.HttpPort))
 	server.ListenAndServe()
-
 }
