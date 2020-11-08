@@ -39,7 +39,7 @@ func SendMailWithAutoSelectSMTP(recv string, subj string, contentType string, bo
 
 //SendMail send mail
 func SendMail(smtpAccount *models.SMTPAccount, recv string, subj string, contentType string, body string) error {
-	from := mail.Address{Name: "", Address: "no_reply1@kaboocha.com"}
+	from := mail.Address{Name: "", Address: "no_reply@kaboocha.com"}
 	to := mail.Address{Name: "", Address: recv}
 
 	headers := make(map[string]string)

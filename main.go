@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/MuShare/mail-sender-pool/pkg/scheduler"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
 
@@ -23,6 +24,7 @@ func init() {
 }
 
 func main() {
+	gin.SetMode(config.ServerConfiguration.RunMode)
 	routersInit := routers.InitRouter()
 	server := &http.Server{
 		Handler:        routersInit,
@@ -32,5 +34,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	logging.Info(fmt.Sprintf("mail sender pool, port: %d", config.ServerConfiguration.HttpPort))
-	server.ListenAndServe()
+	if err := server.ListenAndServe(); err != nil {
+		logging.Fatal(err.Error())
+	}
 }
