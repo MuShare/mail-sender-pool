@@ -81,7 +81,7 @@ func SendMail(smtpAccount *models.SMTPAccount, recv string, subj string, content
 
 		// Auth
 		if err = c.Auth(auth); err != nil {
-			return err
+			return fmt.Errorf("smtp auth failed host=%s username=%s: %w", smtpAccount.Host, smtpAccount.Username, err)
 		}
 		// To && From
 		if err = c.Mail(from.Address); err != nil {
@@ -116,7 +116,7 @@ func SendMail(smtpAccount *models.SMTPAccount, recv string, subj string, content
 		toAddresses := []string{to.Address}
 		err := smtp.SendMail(smtpAccount.Host, auth, from.Address, toAddresses, []byte(message))
 		if err != nil {
-			return err
+			return fmt.Errorf("smtp send failed host=%s username=%s: %w", smtpAccount.Host, smtpAccount.Username, err)
 		}
 	}
 

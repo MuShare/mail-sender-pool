@@ -17,7 +17,7 @@ import (
 type SMTPAccountRequest struct {
 	Host        string `json:"host" binding:"required"`
 	Username    string `json:"user_name" binding:"required"`
-	Password    string `json:"password" bingding:"required"`
+	Password    string `json:"password" binding:"required"`
 	QuotaPerDay int    `json:"quota_per_day" binding:"required"`
 }
 
